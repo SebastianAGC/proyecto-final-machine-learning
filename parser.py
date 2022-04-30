@@ -5,35 +5,18 @@
 
 # Managing imports
 import pandas as pd
-import numpy
 
 
-def normalize_data(data):
-    #removed gameid
-    #removes first blood
-    #removed kda
-    #removed elite monsters
-    #removed total gold
-    #removed avglvl
-    #removed total experience
-    #removed gold diff
-    #removed experience diff
-    #removed cs per min
-    #removed gold per min
-    max_win = max(data["Win"])
+def normalize_dataset1(data):
+
     max_wards_placed = max(data["WardsPlaced"])
     max_wards_destroyed = max(data["WardsDestroyed"])
-    #max_kills = max(data["blueKills"])
-    #max_deaths = max(data["blueDeaths"])
-    #max_assists = max(data["blueAssists"])
     max_dragons = max(data["Dragons"])
     max_heralds = max(data["Heralds"])
     max_towers_destroyed = max(data["TowersDestroyed"])
     max_minions_killed = max(data["TotalMinionsKilled"])
     max_jg_minions_killed = max(data["TotalJungleMinionsKilled"])
-    #max_cs_per_min = max(data["blueCSPerMin"])
 
-    data["Win"] = data["Win"] / max_win
     data["WardsPlaced"] = data["WardsPlaced"] / max_wards_placed
     data["WardsDestroyed"] = data["WardsDestroyed"] / max_wards_destroyed
     data["Dragons"] = data["Dragons"] / max_dragons
@@ -44,6 +27,30 @@ def normalize_data(data):
     return data
 
 
+def normalize_dataset2(data):
+    max_wards_placed = max(data["WardsPlaced"])
+    max_wards_destroyed = max(data["WardsDestroyed"])
+    max_kills = max(data["Kills"])
+    max_deaths = max(data["Deaths"])
+    max_assists = max(data["Assists"])
+    max_dragons = max(data["Dragons"])
+    max_heralds = max(data["Heralds"])
+    max_towers_destroyed = max(data["TowersDestroyed"])
+    max_minions_killed = max(data["TotalMinionsKilled"])
+    max_jg_minions_killed = max(data["TotalJungleMinionsKilled"])
+
+    data["WardsPlaced"] = data["WardsPlaced"] / max_wards_placed
+    data["WardsDestroyed"] = data["WardsDestroyed"] / max_wards_destroyed
+    data["Kills"] = data["Kills"] / max_kills
+    data["Deaths"] = data["Deaths"] / max_deaths
+    data["Assists"] = data["Assists"] / max_assists
+    data["Dragons"] = data["Dragons"] / max_dragons
+    data["Heralds"] = data["Heralds"] / max_heralds
+    data["TowersDestroyed"] = data["TowersDestroyed"] / max_towers_destroyed
+    data["TotalMinionsKilled"] = data["TotalMinionsKilled"] / max_minions_killed
+    data["TotalJungleMinionsKilled"] = data["TotalJungleMinionsKilled"] / max_jg_minions_killed
+    return data
+
 # -------------------------------------------------------------------------------------#
 # -------------------------------------------------------------------------------------#
 # -----------------------------PROGRAM STARTS HERE-------------------------------------#
@@ -52,31 +59,48 @@ def normalize_data(data):
 
 # Inputs
 print("Reading inputs...")
-input_file = pd.read_csv("high_diamond_ranked_10min.csv")
+input_file_dataset1 = pd.read_csv("high_diamond_ranked_10min_wo_kills.csv")
+input_file_dataset2 = pd.read_csv("high_diamond_ranked_10min_w_kills.csv")
+input_file_dataset3 = pd.read_csv("high_diamond_ranked_10min_diff_parsed.csv")
 output_training_size = 1000
 output_test_size = 300
 
 # Normalize data
 print("Normalizing data...")
-input_file_data = normalize_data(input_file)
+data_dataset1 = normalize_dataset1(input_file_dataset1)
+data_dataset2 = normalize_dataset2(input_file_dataset2)
+data_dataset3 = input_file_dataset3
 
 # Shuffle training data
-input_file_data = input_file_data.sample(frac=1)
-
+data_dataset1 = data_dataset1.sample(frac=1)
+data_dataset2 = data_dataset2.sample(frac=1)
+data_dataset3 = data_dataset3.sample(frac=1)
 
 # CODE USED WHEN DATA FILE WAS ONLY ONE FILE
-input_data_training = input_file_data.sample(frac=0.7)
-input_data_test = input_file_data.drop(input_data_training.index)
+dataset1_training = data_dataset1.sample(frac=0.7)
+dataset1_test = data_dataset1.drop(dataset1_training.index)
+dataset1_training2 = dataset1_training.sample(frac=0.7)
+dataset1_validation = dataset1_training.drop(dataset1_training2.index)
+
+dataset2_training = data_dataset2.sample(frac=0.7)
+dataset2_test = data_dataset2.drop(dataset2_training.index)
+dataset2_training2 = dataset2_training.sample(frac=0.7)
+dataset2_validation = dataset2_training.drop(dataset2_training2.index)
+
+dataset3_training = data_dataset3.sample(frac=0.7)
+dataset3_test = data_dataset3.drop(dataset3_training.index)
+dataset3_training2 = dataset3_training.sample(frac=0.7)
+dataset3_validation = dataset3_training.drop(dataset3_training2.index)
 
 # CODE USED TO GENERATE TRAINING AND TEST FILES
-input_data_training.to_csv('league-rankeds-training.csv', index=False)
-input_data_test.to_csv('league-rankeds-test.csv', index=False)
+dataset1_training2.to_csv('league-rankeds-dataset1-training.csv', index=False)
+dataset1_validation.to_csv('league-rankeds-dataset1-validation.csv', index=False)
+dataset1_test.to_csv('league-rankeds-dataset1-test.csv', index=False)
 
+dataset2_training2.to_csv('league-rankeds-dataset2-training.csv', index=False)
+dataset2_validation.to_csv('league-rankeds-dataset2-validation.csv', index=False)
+dataset2_test.to_csv('league-rankeds-dataset2-test.csv', index=False)
 
-#input_training_file = pd.read_csv("winequality-training.csv")  # CHANGE PATH HERE
-#input_test_file = pd.read_csv("winequality-test.csv")  # CHANGE PATH HERE
-#input_iterations = 10000
-#input_alpha = 0.1
-#input_threshold = 0.5
-#input_weights = numpy.zeros(input_training_file.shape[1])
-#input_folds = 10
+dataset3_training2.to_csv('league-rankeds-dataset3-training.csv', index=False)
+dataset3_validation.to_csv('league-rankeds-dataset3-validation.csv', index=False)
+dataset3_test.to_csv('league-rankeds-dataset3-test.csv', index=False)
